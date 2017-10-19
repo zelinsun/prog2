@@ -367,9 +367,9 @@ function loadSpheres() {
                     norm.push(sinPhi * sinTheta);
                     texcoor.push((1 - (longNumber / longlimit)));
                     texcoor.push((1 - (latNumber / latlimit)));
-                    verpos.push(inputSpheres[whichSet].x - 0.5 + inputSpheres[whichSet].r * (cosPhi * sinTheta));
-                    verpos.push(inputSpheres[whichSet].y - 0.5 + inputSpheres[whichSet].r * cosTheta);
-                    verpos.push(inputSpheres[whichSet].z - 0.5 + inputSpheres[whichSet].r * (sinPhi * sinTheta));
+                    verpos.push(inputSpheres[whichSet].x - 0.5 + inputSpheres[whichSet].a * (cosPhi * sinTheta));
+                    verpos.push(inputSpheres[whichSet].y - 0.5 + inputSpheres[whichSet].b * cosTheta);
+                    verpos.push(inputSpheres[whichSet].z - 0.5 + inputSpheres[whichSet].c * (sinPhi * sinTheta));
                     colorarr.push(inputSpheres[whichSet].diffuse[0], inputSpheres[whichSet].diffuse[1], inputSpheres[whichSet].diffuse[2]);
 
                     if((longNumber < longlimit)&&(latNumber < latlimit)){
@@ -413,8 +413,6 @@ function main() {
     setupWebGL(); // set up the webGL environment
     reset();
 
-
-
 } // end main
 
 
@@ -422,8 +420,8 @@ function reset(){
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT); // clear frame/depth buffers
     var triBufferSize = 0;
     loadTriangles(); // load in the triangles from tri file
+    loadSpheres();
     setupShaders(); // setup the webGL shaders
     renderTriangles(); // draw the triangles using webGL
-    //loadSpheres();
 }
 

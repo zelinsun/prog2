@@ -1,14 +1,35 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <title>Prog 2: Rasterization Shell</title>
-
-    <script type="text/javascript" src="gl-matrix-min.js"></script>
-    <script type="text/javascript" src="rasterize.js"></script>
-  </head>
-
-  <body onload="main();">
-    <canvas id="myWebGLCanvas" width="512" height="512"></canvas>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <title>Prog 2: Rasterization Shell</title>
+  <script type="text/javascript" src="gl-matrix-min.js"></script>
+  <script type="text/javascript" src="rasterize.js"></script>
+</head>
+<body onload="main()">
+<canvas id="myWebGLCanvas" width="512" height="512"></canvas>
+<div>
+  <br>
+  All commands
+  <ul>
+    <li><span style="font-style: italic">a and d</span> — translate view left and right along view X</li>
+    <li><span style="font-style: italic">w and s</span> — translate view forward and backward along view Z</li>
+    <li><span style="font-style: italic">q and e</span> — translate view up and down along view Y</li>
+    <li><span style="font-style: italic">A and D</span> — rotate view left and right around view Y (yaw)</li>
+    <li><span style="font-style: italic">W and S</span> — rotate view forward and backward around view X (pitch)</li>
+    <li><span style="font-style: italic">Q and E</span> — rotate selection (counter-)clockwise around view Z (roll)</li>
+    <li><span style="font-style: italic">escape</span> — undo all view changes; restore default view</li>
+    <li><span style="font-style: italic">left and right</span> — select and highlight the next/previous triangle set (previous off)</li>
+    <li><span style="font-style: italic">up and down</span> — select and highlight the next/previous sphere (previous off)</li>
+    <li><span style="font-style: italic">space</span> — deselect and turn off highlight</li>
+    <li><span style="font-style: italic">k and ;</span> — translate selection left and right along view X</li>
+    <li><span style="font-style: italic">o and l</span> — translate selection forward and backward along view Z</li>
+    <li><span style="font-style: italic">i and p</span> — translate selection up and down along view Y</li>
+    <li><span style="font-style: italic">K and :</span> — rotate selection left and right around view Y (yaw)</li>
+    <li><span style="font-style: italic">O and L</span> — rotate selection forward and backward around view X (pitch)</li>
+    <li><span style="font-style: italic">I and P</span> — rotate selection clockwise and counterclockwise around view Z (roll)</li>
+    <li><span style="font-style: italic">backspace</span> — undo all sphere and triangle transformations</li>
+  </ul>
+</div>
+</body>
 </html>

@@ -6,7 +6,7 @@ const WIN_LEFT = 0; const WIN_RIGHT = 1;  // default left and right x coords in 
 const WIN_BOTTOM = 0; const WIN_TOP = 1;  // default top and bottom y coords in world space
 const INPUT_TRIANGLES_URL = "https://ncsucgclass.github.io/prog2/triangles.json"; // triangles file loc
 const INPUT_SPHERES_URL = "https://ncsucgclass.github.io/prog2/ellipsoids.json"; // spheres file loc
-const INPUT_LIGHT_URL = "";
+const INPUT_LIGHT_URL = "https://ncsucgclass.github.io/prog2/lights.json1";
 
 /* Variables for the View, Light, and Reflectivity constants */
 var Eye = new vec3.fromValues(0.5, 0.5, -0.5); // default eye position in world space
@@ -324,11 +324,6 @@ function loadTriangles() {
                 // Tell the color attribute how to get data out of colorBuffer (ARRAY_BUFFER)
                 gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, 4, gl.FLOAT, false, 0, 0);
 
-                // Bind the color buffer.
-                gl.bindBuffer(gl.ARRAY_BUFFER, this.highlightBuffer);
-                // Tell the color attribute how to get data out of colorBuffer (ARRAY_BUFFER)
-                gl.vertexAttribPointer(shaderProgram.vertexHighlightColorAttribute, 4, gl.FLOAT, false, 0, 0);
-
                 // Bind the normal buffer.
                 gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer);
                 gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, 3, gl.FLOAT, false, 0, 0); // feed
@@ -483,11 +478,6 @@ function loadTriangles() {
                 // Tell the color attribute how to get data out of colorBuffer (ARRAY_BUFFER)
                 gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, 4, gl.FLOAT, false, 0, 0);
 
-                // Bind the color buffer.
-                gl.bindBuffer(gl.ARRAY_BUFFER, this.highlightBuffer);
-                // Tell the color attribute how to get data out of colorBuffer (ARRAY_BUFFER)
-                gl.vertexAttribPointer(shaderProgram.vertexHighlightColorAttribute, 4, gl.FLOAT, false, 0, 0);
-
                 // Bind the normal buffer.
                 gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer);
                 gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, 3, gl.FLOAT, false, 0, 0); // feed
@@ -580,13 +570,19 @@ function setupShaders() {
         uniform bool uIsHighlighted;
 
         void main(void) {
-            gl_Position = uPMatrix * uMVMatrix * vec4(vertexPosition, 1.0);
-            // If highlighted use a different buffer from default color buffer
+            float scale = 1.0;
             if(uIsHighlighted){
-              v_color = h_color;
+              scale = 1.2;
             } else {
-              v_color = a_color;
+              scale = 1.0;
             }
+            v_color = a_color;
+            float x = vertexPosition.x;
+            float y = vertexPosition.y;
+            float z = vertexPosition.z;
+            z = z / scale;
+            gl_Position = uPMatrix * uMVMatrix * vec4(x, y, z, 1.0);
+            // If highlighted use a different buffer from default color buffer
             vPosition = uMVMatrix * vec4(vertexPosition, 1.0);
             if(uIsTriangle){
               v_normal = a_normal;
@@ -628,9 +624,6 @@ function setupShaders() {
                 // find and enable the color attribute
                 shaderProgram.vertexColorAttribute  = gl.getAttribLocation(shaderProgram, "a_color");
                 gl.enableVertexAttribArray(shaderProgram.vertexColorAttribute); // input to shader from array
-                // find and enable the color attribute
-                shaderProgram.vertexHighlightColorAttribute  = gl.getAttribLocation(shaderProgram, "h_color");
-                gl.enableVertexAttribArray(shaderProgram.vertexHighlightColorAttribute); // input to shader from array
                 // Add in the normal location to our program for lighting calculatio
                 shaderProgram.vertexNormalAttribute = gl.getAttribLocation(shaderProgram, "a_normal");
                 gl.enableVertexAttribArray(shaderProgram.vertexNormalAttribute);

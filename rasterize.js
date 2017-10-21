@@ -6,12 +6,12 @@ const WIN_LEFT = 0; const WIN_RIGHT = 1;  // default left and right x coords in 
 const WIN_BOTTOM = 0; const WIN_TOP = 1;  // default top and bottom y coords in world space
 const INPUT_TRIANGLES_URL = "https://ncsucgclass.github.io/prog2/triangles.json"; // triangles file loc
 const INPUT_SPHERES_URL = "https://ncsucgclass.github.io/prog2/ellipsoids.json"; // spheres file loc
+const INPUT_LIGHT_URL = "";
 
 /* Variables for the View, Light, and Reflectivity constants */
 var Eye = new vec3.fromValues(0.5, 0.5, -0.5); // default eye position in world space
 var Center = new vec3.fromValues(0.5, 0.5, 0); // default eye position in world space
 var LookUp = new vec3.fromValues(0, 1.0, 0); // default eye position in world space
-var LightLocation = new Float32Array([-2, -4, -5]); // Had to negate x,y and inc z to replicate solution
 var LightColor = new Float32Array([1, 1, 1, 1]);
 var AmbientR = new Float32Array([0.1, 0.1, 0.1]);
 var SpecularR = new Float32Array([0.3, 0.3, 0.3]);
@@ -20,6 +20,7 @@ var SpecularR = new Float32Array([0.3, 0.3, 0.3]);
 // To highlight, set the selection's
 // ambient and diffuse reflectivity to (0.5,0.5,0), specular to (0,0,0).
 // To turn highlighting off, use normal lighting again.
+var LightLocation = new Float32Array([-2, -4, -5]); // Had to negate x,y and inc z to replicate solution
 var hSpecular = new Float32Array([0, 0, 0]);
 var hAmbient = new Float32Array([0.5, 0.5, 0]);
 var hDiffuse = new Float32Array([0.5, 0.5, 0]);
@@ -183,6 +184,17 @@ function setupWebGL() {
 
 } // end setupWebGL
 
+function loadLights() {
+    var inputLights = getJSONFile(INPUT_LIGHT_URL, "lights");
+    if (inputLights != String.null) {
+        var light = inputLights[0];
+        LightLocation = new Float32Array([light.x, light.y, light.z]);
+        hSpecular = light.specular;
+        hAmbient = light.ambient;
+        hDiffuse = light.diffuse;
+    }
+
+}
 // read triangles in, load them into webgl buffers
 function loadTriangles() {
     var inputTriangles = getJSONFile(INPUT_TRIANGLES_URL,"triangles");
@@ -190,7 +202,6 @@ function loadTriangles() {
     var xyz = [0,0,0];
     var rotate = [0,0,0];
     if (inputTriangles != String.null) {
-        // for (var i = 0; i < inputTriangles.length-3; i++) {
         for (var i = 0; i < inputTriangles.length; i++) {
             var coordArray = []; // 1D array of vertex coords for WebGL
             var indexArray = []; // 1D array of vertex indices for WebGL
@@ -262,7 +273,7 @@ function loadTriangles() {
 
                 // Projection and View transforms
                 mat4.perspective(pMatrix, 45, gl.viewportWidth / gl.viewportHeight, 0.1, 100);
-                mat4.identity(mvMatrix)
+                mat4.identity(mvMatrix);
                 mat4.lookAt(mvMatrix, Eye, Center, LookUp);
 
                 // Do global transformation then the local
@@ -366,13 +377,9 @@ function loadTriangles() {
                     var x = cosPhi * sinTheta;
                     var y = cosTheta;
                     var z = sinPhi * sinTheta;
-                    // var u = 1 - (longNumber / longitudeBands);
-                    // var v = 1 - (latNumber / latitudeBands);
                     sNormalArray.push(x);
                     sNormalArray.push(y);
                     sNormalArray.push(z);
-                    // textureCoordData.push(u);
-                    // textureCoordData.push(v);
                     sCoordArray.push(sphere.x - radius_a * x);
                     sCoordArray.push(sphere.y - radius_b * y);
                     sCoordArray.push(sphere.z - radius_c * z);
@@ -736,7 +743,7 @@ function resetSpheres(){
 function handleKeys() {
     var resetView = false;
     var unselect = false;
-    if (event.keyCode == 39) {
+    if (event.key == 'ArrowRight') {
         if(currentlySelectedTriangle == -1){
             currentlySelectedTriangle = 0;
         } else if(currentlySelectedTriangle < tris.length - 1){
@@ -750,7 +757,7 @@ function handleKeys() {
         sphereSelected = false;
     }
     // Press Left
-    if (event.keyCode == 37) {
+    if (event.key == 'ArrowLeft') {
         if(currentlySelectedTriangle == -1){
             currentlySelectedTriangle = tris.length - 1;
         } else if(currentlySelectedTriangle > 0){
@@ -765,7 +772,7 @@ function handleKeys() {
     }
 
     // Up and Down to hightlight/select the next sphere; we'll go clockwise
-    if (event.keyCode == 38) { // Up
+    if (event.key == 'ArrowUp') { // Up
         if(currentlySelectedSphere == -1){
             currentlySelectedSphere = 0;
         } else if(currentlySelectedSphere < spheres.length - 1){
@@ -779,7 +786,7 @@ function handleKeys() {
         triSelected = false;
     }
 
-    if (event.keyCode == 40) { // Down
+    if (event.key == 'ArrowDown') { // Down
         if(currentlySelectedSphere == -1){
             currentlySelectedSphere = spheres.length - 1;
         } else if(currentlySelectedSphere > 0){
@@ -794,7 +801,7 @@ function handleKeys() {
     }
 
     // Space to deselect and turn off highlight
-    if (event.keyCode == 32) {
+    if (event.key == ' ') {
         sphereSelected = false;
         triSelected = false;
         unselect = true;
@@ -803,13 +810,13 @@ function handleKeys() {
     }
 
     // Reset on ESC
-    if (event.keyCode == 27) {
+    if (event.key == 'Escape') {
         resetView = true;
     }
 
     var object;
     // Backspace
-    if(event.keyCode == 8){
+    if(event.key == 'Backspace'){
         // resetLocalVars();
         sphereSelected = false;
         triSelected = false;
@@ -829,47 +836,47 @@ function handleKeys() {
 
     /** DEFAULT BEHAVIOR (no selection) **/
     if(!triSelected && !sphereSelected){
-        if (String.fromCharCode(event.keyCode) == "W" && !event.shiftKey) {
+        if (event.key == 'w') {
             // Back along z
             z += 0.01;
-        } else if(String.fromCharCode(event.keyCode) == "W" && event.shiftKey){
+        } else if(event.key == 'W'){
             // Rotate forward on x
             rotateX += Math.PI / 180;
         }
-        if (String.fromCharCode(event.keyCode) == "S" && !event.shiftKey) {
+        if (event.key == 's') {
             // Forward along x
             z -= 0.01;
-        } else if(String.fromCharCode(event.keyCode) == "S" && event.shiftKey){
+        } else if(event.key == 'S'){
             // Rotate backward on x
             rotateX -= Math.PI / 180;
         }
 
-        if (String.fromCharCode(event.keyCode) == "A" && !event.shiftKey) {
+        if (event.key == 'a') {
             // Left along x
             x -= 0.01;
-        }  else if(String.fromCharCode(event.keyCode) == "A" && event.shiftKey){
+        }  else if(event.key == 'A'){
             // Rotate left along y
             rotateY += Math.PI / 180;
         }
-        if (String.fromCharCode(event.keyCode) == "D" && !event.shiftKey) {
+        if (event.key == 'd') {
             // Right along x
             x += 0.01;
-        }  else if(String.fromCharCode(event.keyCode) == "D" && event.shiftKey){
+        }  else if(event.key == 'D'){
             // Rotate right along y
             rotateY -= Math.PI / 180;
         }
 
-        if (String.fromCharCode(event.keyCode) == "Q" && !event.shiftKey) {
+        if (event.key == 'q') {
             // Left along
             y -= 0.01;
-        }   else if(String.fromCharCode(event.keyCode) == "Q" && event.shiftKey){
+        }   else if(event.key == 'Q'){
             // Rotate view CC on z
             rotateZ += Math.PI / 180;
         }
-        if (String.fromCharCode(event.keyCode) == "E" && !event.shiftKey) {
+        if (event.key == 'e') {
             // Right view C on z
             y += 0.01;
-        }  else if(String.fromCharCode(event.keyCode) == "E" && event.shiftKey){
+        }  else if(event.key == 'E'){
             rotateZ -= Math.PI / 180;
         }
     } else {/** Selected object behavior **/
@@ -886,48 +893,48 @@ function handleKeys() {
         fillLocalVars(object.xyzLocal, object.rotateLocal);
 
         // Transformations
-        if (String.fromCharCode(event.keyCode) == "K" && !event.shiftKey) {
+        if (event.key == 'k') {
             // Left along x
             lx += 0.01;
-        } else if(String.fromCharCode(event.keyCode) == "K" && event.shiftKey){
+        } else if(event.key == 'K'){
             // Rotate forward on y
             lrotateY += Math.PI / 180;
         }
         // char ;
-        if (event.keyCode == 186 && !event.shiftKey) {
+        if (event.key == ';') {
             // Right along x
             lx -= 0.01;
-        } else if(event.keyCode == 186 && event.shiftKey){
+        } else if(event.key == ':'){
             // Rotate backward on y
             lrotateY -= Math.PI / 180;
         }
 
-        if (String.fromCharCode(event.keyCode) == "O" && !event.shiftKey) {
+        if (event.key == 'o') {
             // Left along x
             lz += 0.01;
-        }  else if(String.fromCharCode(event.keyCode) == "O" && event.shiftKey){
+        }  else if(event.key == 'O'){
             // Rotate left along y
             lrotateX += Math.PI / 180;
         }
-        if (String.fromCharCode(event.keyCode) == "L" && !event.shiftKey) {
+        if (event.key == 'l') {
             // Right along x
             lz -= 0.01;
-        }  else if(String.fromCharCode(event.keyCode) == "L" && event.shiftKey){
+        }  else if(event.key == 'L'){
             // Rotate right along y
             lrotateX -= Math.PI / 180;
         }
 
-        if (String.fromCharCode(event.keyCode) == "I" && !event.shiftKey) {
+        if (event.key == 'i') {
             // Left along
             ly -= 0.01;
-        }   else if(String.fromCharCode(event.keyCode) == "I" && event.shiftKey){
+        }   else if(event.key == 'I'){
             // Rotate view CC on z
             lrotateZ += Math.PI / 180;
         }
-        if (String.fromCharCode(event.keyCode) == "P" && !event.shiftKey) {
+        if (event.key == 'p') {
             // Right view C on z
             ly += 0.01;
-        }  else if(String.fromCharCode(event.keyCode) == "P" && event.shiftKey){
+        }  else if(event.key == 'P'){
             lrotateZ -= Math.PI / 180;
         }
     }
@@ -963,6 +970,7 @@ function main() {
     setupWebGL(); // set up the webGL environment
     setupShaders(); // setup the webGL shaders (attribs)
     loadTriangles(); // load in the triangles from tri file (buffers)
+    loadLights();
     drawScene(); // draw the triangles using webGL
     document.onkeydown = handleKeyDown;
     document.onkeyup = handleKeyUp;
